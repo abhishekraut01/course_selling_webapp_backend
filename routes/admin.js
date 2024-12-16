@@ -110,6 +110,12 @@ router.post("/login", async (req, res) => {
   res.status(200).json({ msg: "Login successful!" });
 });
 
+router.post("/logout", (req, res) => {
+    res.clearCookie("jwt"); // Clear the cookie
+    res.status(200).json({ msg: "Logged out successfully!" });
+});
+  
+
 router.post("/courses", handleAdminAuth, async (req, res) => {
   // Validate input
   const userRes = zodCoursesSchema.safeParse(req.body);
@@ -146,6 +152,16 @@ router.post("/courses", handleAdminAuth, async (req, res) => {
   }
 });
 
-router.get("/courses", handleAdminAuth, (req, res) => {});
+router.get("/courses", handleAdminAuth, (req, res) => {
+    const adminData = req.admin;
+    const {username , password } = adminData;
+
+    try {
+        const isUserExist = adminModel.find({username , password})
+
+    } catch (error) {
+        
+    }
+});
 
 module.exports = router;
