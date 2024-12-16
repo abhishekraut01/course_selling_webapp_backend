@@ -1,18 +1,25 @@
-const adminModel = require('../models/adminModel')
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+dotenv.config();
 
-const HandleAdminAuth = async (req,res,next)=>{
-    const username = req.headers.username ;
-    const password = req.headers.password ;
+const HandleAdminAuth = async (req, res, next) => {
 
-    const isUserExist = await adminModel.findOne({username , password})
+  try {
+    const token = req.cookies.jwt;
 
-    if(isUserExist){
-        next()
-    }else{
-        res.status(403).json({
-            msg:"invalid username or password"
-        })
+    if (!token) {
+      return res.status(403).json({ msg: "Access denied. No token provided." });
     }
-}
 
-module.exports = HandleAdminAuth
+    const decoded = jwt.verify(token, process.env.JWT_KEY);
+
+    // Attach user data (like userId) to the request for further use
+    req.admin = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ msg: "Invalid token." });
+  }
+  
+};
+
+module.exports = HandleAdminAuth;
