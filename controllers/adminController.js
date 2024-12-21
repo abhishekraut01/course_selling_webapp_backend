@@ -156,8 +156,23 @@ const adminCreateCourses = async (req, res) => {
     }
 };
 
-const adminGetCourses = (req, res) => {
-    
+const adminGetCourses = async (req, res, next) => {
+    try {
+        const allCourses = await Course.find({});
+
+        if (allCourses.length === 0) {
+            return res.status(404).json({
+                message: "No courses found",
+            });
+        }
+
+        res.status(200).json({
+            message: "All courses fetched successfully",
+            courses: allCourses,
+        });
+    } catch (error) {
+        next(error); 
+    }
 };
 
 module.exports = {
