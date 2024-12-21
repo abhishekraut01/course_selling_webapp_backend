@@ -6,7 +6,7 @@ const handleUserAuth = (req, res, next) => {
     const token = req.cookie.jwt;
 
     if (!token) {
-      res.status(403).json({
+      return res.status(403).json({
         message: "Could not varify token please login/signup",
       });
     }
@@ -14,10 +14,11 @@ const handleUserAuth = (req, res, next) => {
     const isTokenValid = jwt.verify(token, process.env.JWT_KEY);
 
     if (!isTokenValid) {
-      res.status(403).json({
+      return res.status(403).json({
         message: "Token is invalid please login Again",
       });
     }
+    next()
   } catch (error) {
     next(error);
   }
