@@ -3,6 +3,7 @@ dotenv.config()
 
 const express = require("express");
 const app = express()
+const cookieParser = require("cookie-parser");
 
 //connect database
 const dbConnect = require('./db/dbConnection')
@@ -15,6 +16,7 @@ const userRoute = require('./routes/user.routes')
 //middlewares for parsing body and form content
 app.use(express.json)
 app.use(express.urlencoded({extended:true}))
+app.use(cookieParser());
 
 app.use('/admin',adminRoute)
 app.use('/user',userRoute)

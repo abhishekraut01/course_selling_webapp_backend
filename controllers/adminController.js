@@ -1,33 +1,9 @@
 const express = require("express");
-const zod = require("zod");
 const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
-const bcrypt = require("./bcryptjs");
 
 const Admin = require("../models/admin.models");
-
-const adminSignUpSchema = zod.object({
-    username: zod.string(),
-    password: zod.string().min(8),
-});
-
-const handleHashPassword = (password) => {
-    const saltRound = 10;
-    const hashPass = bcrypt.hash(password, saltRound);
-    return hashPass;
-};
-
-const verifyPassword = async (password, hashedPassword) => {
-    try {
-        const isMatch = await bcrypt.compare(password, hashedPassword);
-        return isMatch;
-    } catch (error) {
-        console.error("Error in verifyPassword:", error.message); 
-        throw new Error("Failed to verify password"); 
-    }
-};
-
-
+const { adminSignUpSchema } = require('../utils/validationSchema')
+const {handleHashPassword , verifyPassword} = require('../utils/encryption')
 
 const adminSignup = async (req, res, next) => {
     const userRes = adminSignUpSchema.safeParse(req.body);
@@ -124,9 +100,24 @@ const adminLogin = async (req, res, next) => {
 };
 
 
-const adminLogout = (req, res) => { };
+const adminLogout = (req, res) => {
+    // Clear the JWT cookie by setting it to expire immediately
+    res.cookie("jwt", "", {
+        httpOnly: true,  // Ensures cookie is not accessible via JavaScript
+        secure: process.env.NODE_ENV === "production",  // Use secure cookies in production
+        sameSite: "strict",  // Ensures cookies are sent in same-site requests
+        expires: new Date(0),  // Sets the cookie expiration to the past
+    });
 
-const adminCreateCourses = (req, res) => { };
+    // Send response
+    res.status(200).json({
+        message: "Logged out successfully",
+    });
+};
+
+const adminCreateCourses = (req, res) => {
+    
+};
 
 const adminGetCourses = (req, res) => { };
 
