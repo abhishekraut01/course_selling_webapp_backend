@@ -1,29 +1,35 @@
-const express = require('express');
-const app = express();
-const dotenv = require('dotenv');
-dotenv.config();
-const connectDb = require('./models/connectDb')
-connectDb();
+const dotenv = require('dotenv')
+dotenv.config()
 
-const PORT = process.env.PORT || 3000
+const express = require("express");
+const app = express()
 
-const adminRouter = require('./routes/admin')
-const userRouter = require('./routes/user')
+//connect database
+const dbConnect = require('./db/dbConnection')
+dbConnect()
 
-// Middleware to parse JSON request bodies
-app.use(express.json());
-app.use('/admin',adminRouter)
-app.use('/user',userRouter)
+//importing the routes for admin and user
+const adminRoute = require('./routes/admin.routes')
+const userRoute = require('./routes/user.routes')
 
-app.use((err,req,res,next)=>{
-    if(err){
-        res.json({
-            msg:"something is wrong with your server"
-        })
-    }
-    next()
-})
+//middlewares for parsing body and form content
+app.use(express.json)
+app.use(express.urlencoded({extended:true}))
 
-app.listen(PORT , ()=>{
-    console.log("server is running on port"+PORT)
-})
+app.use('/admin',adminRoute)
+app.use('/user',userRoute)
+
+//handling error globally
+app.use((err, req, res, next) => {
+    console.error(err.stack); // Logs the error stack for debugging
+    // Customize the error response
+    res.status(err.status || 500).json({
+      message: err.message || "Internal Server Error",
+      error: process.env.NODE_ENV === "development" ? err : {}, // Include error details in development
+    });
+  });
+  
+
+app.listen(PORT, () => {
+    console.log(`Server started on ${PORT}`);
+});
