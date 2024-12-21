@@ -2,7 +2,9 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 
 const Admin = require("../models/admin.models");
-const { adminSignUpSchema } = require('../utils/validationSchema')
+const Course = require("../models/course.models");
+
+const { adminSignUpSchema ,courseSchema } = require('../utils/validationSchema')
 const {handleHashPassword , verifyPassword} = require('../utils/encryption')
 
 const adminSignup = async (req, res, next) => {
@@ -115,11 +117,48 @@ const adminLogout = (req, res) => {
     });
 };
 
-const adminCreateCourses = (req, res) => {
-    
+const adminCreateCourses = async (req, res) => {
+    // Validate request body using Zod schema
+    const validationResult = courseSchema.safeParse(req.body) 
+
+    if (!validationResult.success) {
+        return res.status(400).json({
+            message: "Invalid input",
+            errors: validationResult.errors,
+        });
+    }
+
+    const { title, description, price, imageLink } = req.body;
+
+    try {
+        // Create the course in the database
+        const newCourse = new Course({
+            title,
+            description,
+            price,
+            imageLink,
+        });
+
+        // Save the new course
+        const savedCourse = await newCourse.save();
+
+        // Send response with success message and course ID
+        res.status(201).json({
+            message: "Course created successfully",
+            courseId: savedCourse._id,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Failed to create course",
+            error: error.message,
+        });
+    }
 };
 
-const adminGetCourses = (req, res) => { };
+const adminGetCourses = (req, res) => {
+    
+};
 
 module.exports = {
     adminSignup,
