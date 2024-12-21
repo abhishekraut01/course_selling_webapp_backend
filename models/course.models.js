@@ -1,7 +1,8 @@
 const mongoose = require("mongoose")
+const { string } = require("zod")
 
 const courseSchema = new mongoose.Schema({
-    name:{
+    title:{
         type:String,
         required:true
     },
@@ -17,6 +18,10 @@ const courseSchema = new mongoose.Schema({
         type:string,
         required:true,
         default:false
+    },
+    imageLink:{
+        type:string,
+        required:true
     }
 })
 
