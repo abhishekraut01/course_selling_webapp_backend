@@ -111,10 +111,9 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/logout", (req, res) => {
-    res.clearCookie("jwt"); // Clear the cookie
-    res.status(200).json({ msg: "Logged out successfully!" });
+  res.clearCookie("jwt"); // Clear the cookie
+  res.status(200).json({ msg: "Logged out successfully!" });
 });
-  
 
 router.post("/courses", handleAdminAuth, async (req, res) => {
   // Validate input
@@ -152,16 +151,28 @@ router.post("/courses", handleAdminAuth, async (req, res) => {
   }
 });
 
-router.get("/courses", handleAdminAuth, (req, res) => {
-    const adminData = req.admin;
-    const {username , password } = adminData;
+router.get("/courses", handleAdminAuth, async (req, res) => {
+  const adminData = req.admin;
+  const { username, password } = adminData;
 
-    try {
-        const isUserExist = adminModel.find({username , password})
+  try {
+    const isUserExist = await adminModel.find({ username, password });
 
-    } catch (error) {
-        
+    if (isUserExist) {
+      // Get all courses
+      const courses = await coursesModel.find({});
+      res.status(200).json({
+        courses,
+      });
     }
+  } catch (error) {
+    console.error("Error while creating course:", error.message);
+
+    // Send error response
+    return res.status(500).json({
+      msg: "An error occurred while getting all courses.",
+    });
+  }
 });
 
 module.exports = router;
