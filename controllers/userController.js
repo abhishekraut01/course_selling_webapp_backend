@@ -137,11 +137,58 @@ const userPurchaseCourses = async (req, res, next) => {
     } catch (error) {
       next(error);
     }
-  };
+};
   
-const userGetCourses = (req, res) => {};
+const userGetCourses = async(req, res) => {
+    try {
+        const allCourses = await Course.find({});
 
-const userGetPurchasedCourses = (req, res) => {};
+        if (allCourses.length === 0) {
+            return res.status(404).json({
+                message: "No courses found",
+            });
+        }
+
+        res.status(200).json({
+            message: "All courses fetched successfully",
+            courses: allCourses,
+        });
+    } catch (error) {
+        next(error); 
+    }
+};
+
+const userGetPurchasedCourses = async (req, res, next) => {
+    const { username } = req.user; // Ensure req.user is populated by middleware
+  
+    try {
+      // Fetch user data
+      const userData = await User.findOne({ username });
+  
+      // Check if user exists
+      if (!userData) {
+        throw new Error("User not found.");
+      }
+  
+      // Get purchased courses
+      const allCourses = userData.purchasedCourses;
+  
+      // Check if there are any purchased courses
+      if (!allCourses || allCourses.length === 0) {
+        throw new Error("No courses purchased yet.");
+      }
+  
+      // Respond with purchased courses
+      res.status(200).json({
+        success: true,
+        courses: allCourses,
+      });
+    } catch (error) {
+      // Pass error to the global error handler
+      next(error);
+    }
+};
+  
 
 module.exports = {
     userSignup,
