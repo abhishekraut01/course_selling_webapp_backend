@@ -95,10 +95,50 @@ const userLogin =async (req, res) => {
     }
 };
 
-const userLogout = (req, res) => {};
+const userLogout = (req, res) => {
+    res.clearCookie("jwt");
+    res.status(200).json({
+        message: "Logged out successfully",
+    });
+};
 
-const userPurchaseCourses = (req, res) => {};
-
+const userPurchaseCourses = async (req, res, next) => {
+    const courseId = req.params.courseId;
+    const { username } = req.user;
+  
+    try {
+      // Validate inputs
+      if (!courseId) {
+        throw new Error("Course ID is required.");
+      }
+      // Update user's purchased courses
+      const updatedUser = await User.findOneAndUpdate(
+        { username },
+        {
+          $push: { purchasedCourses: courseId },
+        },
+        { new: true } // Return the updated document
+      );
+  
+      // Check if user exists
+      if (!updatedUser) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found.",
+        });
+      }
+  
+      // Respond with success
+      res.status(200).json({
+        success: true,
+        message: "Course purchased successfully.",
+        user: updatedUser,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  
 const userGetCourses = (req, res) => {};
 
 const userGetPurchasedCourses = (req, res) => {};
